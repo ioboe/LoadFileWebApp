@@ -1,0 +1,77 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<br />
+
+<div class="mb-3">
+    <label for="formFile" class="form-label">File</label>
+    <input class="form-control" type="file" id="file">
+</div>
+<div class="mb-3">
+    <input type="button" id="btnUpload" value="Upload" />
+</div>
+<table>
+    <tr>
+        <td colspan="2">
+            <progress id="fileProgress" style="display: none"></progress>
+        </td>
+    </tr>
+</table>
+
+<span id="lblMessage" style="color: Green"></span>
+
+<div id="formDowloand" class="mb-3" style="display:none">
+    <input type="button" id="btnDowloand" value="Dowloand zip" />
+</div>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+<script type="text/javascript">
+    $("body").on("click", "#btnUpload", function () {
+        var formData = new FormData();
+        formData.append("fileName", $("#fileName").val());
+        formData.append("file", $("#file")[0].files[0]);
+        $.ajax({
+            url: '/Home/UploadFiles',
+            type: 'POST',
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                if (response.status == "error") {
+                    $("#fileProgress").hide();
+                    alert("Server error!!");
+                }
+                else {
+                    $("#fileProgress").hide();
+                    //$("#lblMessage").html("<b>" + fileName + "</b> has been uploaded.");
+                    $("#lblMessage").html("File has been archived.");
+                    $("#formDowloand").show();
+                }
+            },
+            xhr: function () {
+                var fileXhr = $.ajaxSettings.xhr();
+                if (fileXhr.upload) {
+                    $("progress").show();
+                    fileXhr.upload.addEventListener("progress", function (e) {
+                        if (e.lengthComputable) {
+                            $("#fileProgress").attr({
+                                value: e.loaded,
+                                max: e.total
+                            });
+                        }
+                    }, false);
+                }
+                return fileXhr;
+            }
+        });
+    });
+
+    $("body").on("click", "#btnDowloand", function () {
+        debugger;
+        window.location = "@ViewBag.ArchiveServerUrl" + "GetFile?name=" + $("#file")[0].files[0].name;
+    });
+
+</script>
